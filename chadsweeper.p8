@@ -1,6 +1,32 @@
 pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
+
+//the pico-8 is 128x128 pixels, but this game operates in text characters
+screen_width = 32
+screen_height = 20
+
+function _init()
+  foo = "q"
+  //todo: place the mines in the 2d-array here. (learn how 2d arrays work in lua)
+  //If feeling particularly go-getterish, place the numbers here as well. But probably dynamically recompute those each frame — will even be a feature later with more gameplay mechanics.
+end
+
+function _update() // I should possibly be defining _update60 instead to get 60 fps?
+  foo = foo .. "ah!⃣"
+  //TODO: track player movement and cursor
+end
+
+function _draw()
+  cls()
+  print(foo)
+  
+  //TODO: draw the board and cursor
+  
+  -- print out @STAT(1) at the end of each frame if you want to see perf information (portion of)
+  -- print(@stat(1))
+end
+
 print("hello~")
 print("HELLO ヘロ")
 __gfx__
