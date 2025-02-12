@@ -12,17 +12,9 @@ win_or_lose = "game end" //neutral value to begin with
 cursor_x = 1
 cursor_y = 1
 
-function enable_fast_motion()
-  //btnp (button press) delays //note that the delay is in "(in frames @ 30fps)", so it's doubled at 60fps like we have.
-  poke(0X5F5C, 1) -- "SET THE INITIAL DELAY BEFORE REPEATING. 255 MEANS NEVER REPEAT."
-  poke(0X5F5D, 1) -- "SET THE REPEATING DELAY."
-end
+a_little_wait = 50
 
-function disable_fast_motion()
-  // "In both cases, 0 can be used for the default behaviour (delays 15 and 4)"
-  poke(0X5F5C, 200) -- SET THE INITIAL DELAY BEFORE REPEATING. 255 MEANS NEVER REPEAT.
-  poke(0X5F5D, 200) -- SET THE REPEATING DELAY.
-end
+artificial_input_rate_limiter = 20
 
 function _init() //we don't really use this one
 end
@@ -32,68 +24,83 @@ function _update60() // defining _update60 instead of _update to get 60 fps
   //If you exclude that variation selector, then left button will be detected instead of the O. What a world!
   
   if game_state == "menu" then
-    if btnp(🅾️) then
-      //init the entire game for real
-      field = {}
-      dug = {}
-      flag = {}
-      for y = 1, screen_height do
-        field[y] = {}
-        dug[y] = {}
-        flag[y] = {}
-        for x = 1, screen_width do
-          dug[y][x] = 0 -- nothing is dug yet
-          flag[y][x] = 0
-          if rnd() < 0.1 then // 10% mine chance
-            field[y][x] = 1 -- Place a mine
-          else
-            field[y][x] = 0 -- no mine
+    if artificial_input_rate_limiter == 0 then
+      artificial_input_rate_limiter = 2
+      if btnp(🅾️) then
+        //init the entire game for real
+        field = {}
+        dug = {}
+        flag = {}
+        for y = 1, screen_height do
+          field[y] = {}
+          dug[y] = {}
+          flag[y] = {}
+          for x = 1, screen_width do
+            dug[y][x] = 0 -- nothing is dug yet
+            flag[y][x] = 0
+            if rnd() < 0.1 then // 10% mine chance
+              field[y][x] = 1 -- Place a mine
+            else
+              field[y][x] = 0 -- no mine
+            end
           end
         end
+        game_state = "playing"
+        return
       end
-      game_state = "playing"
-      return
-    end
-    if btnp(❎) then
-      stop()
+      if btnp(❎) then
+        stop()
+      end
+    else
+      artificial_input_rate_limiter -= 1
     end
   end
 
   if game_state == "playing" then
-    enable_fast_motion()
-    if btnp(⬅️) and cursor_x > 1 then
-      cursor_x -= 1
+    if artificial_input_rate_limiter == 0 then //todo: this is just for feel, but it could be improved with some input buffering probably.
+      artificial_input_rate_limiter = 2
+      if btn(⬅️) and cursor_x > 1 then
+        cursor_x -= 1
+      end
+      if btn(➡️) and cursor_x < screen_width then
+        cursor_x += 1
+      end
+      if btn(⬆️) and cursor_y > 1 then
+        cursor_y -= 1
+      end
+      if btn(⬇️) and cursor_y < screen_height then
+        cursor_y += 1
+      end
+    else
+      artificial_input_rate_limiter -= 1
     end
-    if btnp(➡️) and cursor_x < screen_width then
-      cursor_x += 1
-    end
-    if btnp(⬆️) and cursor_y > 1 then
-      cursor_y -= 1
-    end
-    if btnp(⬇️) and cursor_y < screen_height then
-      cursor_y += 1
-    end
-    if btnp(🅾️) then
+    if btn(🅾️) then
       dug[cursor_y][cursor_x] = 1
       if field[cursor_y][cursor_x] == 1 then
         game_state = "end"
-        disable_fast_motion()
+        artificial_input_rate_limiter = a_little_wait
       end
     elseif btnp(❎) then
       if dug[cursor_y][cursor_x] != 1 then
-        flag[cursor_y][cursor_x] ^= flag[cursor_y][cursor_x]
+        flag[cursor_y][cursor_x] ^^= 1
       end
     end
     return
   end
 
   if game_state == "end" then
-    if btnp(🅾️) then
-      game_state = "menu"
-      return
-    end
-    if btnp(❎) then
-      stop()
+    if artificial_input_rate_limiter == 0 then
+      artificial_input_rate_limiter = 2
+      if btnp(🅾️) then
+        game_state = "menu"
+        artificial_input_rate_limiter = a_little_wait
+        return
+      end
+      if btnp(❎) then
+        stop()
+      end
+    else
+      artificial_input_rate_limiter -= 1
     end
   end
 
@@ -121,8 +128,11 @@ function _draw()
     end
     for y = 1, screen_height do
       for x = 1, screen_width do
-        if dug[y][x] != 0 then
+        //todo: we have to actually draw, you know, the minesweeper numbers.
+        if dug[y][x] == 1 then
           char = field[y][x]
+        elseif flag[y][x] == 1 then
+          char = "x"
         else
           char = "?"
         end
