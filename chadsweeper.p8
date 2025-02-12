@@ -14,7 +14,17 @@ cursor_y = 1
 
 a_little_wait = 50
 
-artificial_input_rate_limiter = 20
+artificial_input_rate_limiter = 10
+
+//this makes trying to access a member of nil return 0, which is very convenient for this codebase (checking the grid)
+
+safe_accessable={
+  __index = function()
+    return 0
+  end
+}
+
+setmetatable(nil, safe_accessable)
 
 function _init() //we don't really use this one
 end
@@ -128,9 +138,20 @@ function _draw()
     end
     for y = 1, screen_height do
       for x = 1, screen_width do
-        //todo: we have to actually draw, you know, the minesweeper numbers.
         if dug[y][x] == 1 then
-          char = field[y][x]
+          if field[y][x] == 1 then
+            char = "●"
+          else
+            minesweeper_number = 0 -- initialize
+            minesweeper_number  = field[y-1][x-1] or 0 + field[y-1][x] or 0 + field[y-1][x+1] or 0
+                                //+ field[y][x-1]   +       0       + field[y][x+1]
+                                //+ field[y+1][x-1] + field[y+1][x] + field[y+1][x+1]
+            if minesweeper_number == 0 then
+              char = " "
+            else
+              char = minesweeper_number
+            end
+          end
         elseif flag[y][x] == 1 then
           char = "x"
         else
