@@ -14,17 +14,33 @@ cursor_y = 1
 
 a_little_wait = 50
 
-artificial_input_rate_limiter = 10
+artificial_input_rate_limiter = 5
 
 //this makes trying to access a member of nil return 0, which is very convenient for this codebase (checking the grid)
 
-safe_accessable={
-  __index = function()
+function get2(table, y, x)
+  acc = table[y]
+  if acc == nil then
     return 0
+  else
+    acc = acc[x]
+    if acc == nil then
+      return 0
+    else
+      return acc
+    end
   end
-}
+end
 
-setmetatable(nil, safe_accessable)
+function lose()
+  game_state = "end"
+  win_or_lose = "you lose"
+end
+
+function win()
+  game_state = "end"
+  win_or_lose = "you win"
+end
 
 function _init() //we don't really use this one
 end
@@ -37,7 +53,7 @@ function _update60() // defining _update60 instead of _update to get 60 fps
     if artificial_input_rate_limiter == 0 then
       artificial_input_rate_limiter = 2
       if btnp(🅾️) then
-        //init the entire game for real
+        //init the entire playfield
         field = {}
         dug = {}
         flag = {}
@@ -87,7 +103,7 @@ function _update60() // defining _update60 instead of _update to get 60 fps
     if btn(🅾️) then
       dug[cursor_y][cursor_x] = 1
       if field[cursor_y][cursor_x] == 1 then
-        game_state = "end"
+        lose()
         artificial_input_rate_limiter = a_little_wait
       end
     elseif btnp(❎) then
@@ -95,6 +111,17 @@ function _update60() // defining _update60 instead of _update to get 60 fps
         flag[cursor_y][cursor_x] ^^= 1
       end
     end
+    
+    //check if the user has won
+    for y = 1, screen_height do
+      for x = 1, screen_width do
+        if field[y][x] != 1 and dug[y][x] != 1 then
+          //safe tile, that is undug, means you haven't won yet
+          return
+        end
+      end
+    end
+    win()
     return
   end
 
@@ -140,12 +167,12 @@ function _draw()
       for x = 1, screen_width do
         if dug[y][x] == 1 then
           if field[y][x] == 1 then
-            char = "●"
+            char = "!"
           else
             minesweeper_number = 0 -- initialize
-            minesweeper_number  = field[y-1][x-1] or 0 + field[y-1][x] or 0 + field[y-1][x+1] or 0
-                                //+ field[y][x-1]   +       0       + field[y][x+1]
-                                //+ field[y+1][x-1] + field[y+1][x] + field[y+1][x+1]
+            minesweeper_number  = get2(field, y-1, x-1) + get2(field, y-1, x) + get2(field, y-1, x+1)
+                                + get2(field, y, x-1)   +           0         + get2(field, y, x+1)
+                                + get2(field, y+1, x-1) + get2(field, y+1, x) + get2(field, y+1, x+1)
             if minesweeper_number == 0 then
               char = " "
             else
