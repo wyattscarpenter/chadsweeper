@@ -29,15 +29,10 @@ function _update() // I should possibly be defining _update60 instead to get 60 
       for y = 1, GRID_HEIGHT do
           grid[y] = {}
           for x = 1, GRID_WIDTH do
-              grid[y][x] = 0 -- Default to no mine
-          end
-      end
-
-      -- randomly place mines
-      for y = 1, GRID_HEIGHT do
-          for x = 1, GRID_WIDTH do
               if rnd() < MINE_CHANCE then
-                  grid[y][x] = 1 -- Place a mine
+                grid[y][x] = 1 -- Place a mine
+              else
+                grid[y][x] = 0 -- no mine
               end
           end
       end
@@ -92,10 +87,10 @@ function _draw()
       print(win_or_lose.."! 🅾️: restart ❎: quit")
     end
     for y = 1, GRID_HEIGHT do
-        for x = 1, GRID_WIDTH do
-            local cell = grid[y][x]
-            print(cell, x * 8, y * 8, 7)
-        end
+      for x = 1, GRID_WIDTH do
+        local cell = grid[y][x]
+        print(cell, x * 4 - 4, y * 6, 7)
+      end
     end
   end
   -- print(@stat(1))  -- print out @STAT(1) at the end of each frame if you want to see perf information (portion of)
