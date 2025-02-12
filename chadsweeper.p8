@@ -18,7 +18,29 @@ function _update() // I should possibly be defining _update60 instead to get 60 
   
   if game_state == "menu" then
     if btnp(🅾️) then
-      //TODO: init the entire game for real
+      //init the entire game for real
+      -- Constants for grid size
+      GRID_WIDTH = screen_width
+      GRID_HEIGHT = screen_height - 1
+      MINE_CHANCE = 0.1
+
+      -- Initialize grid with empty values
+      grid = {}
+      for y = 1, GRID_HEIGHT do
+          grid[y] = {}
+          for x = 1, GRID_WIDTH do
+              grid[y][x] = 0 -- Default to no mine
+          end
+      end
+
+      -- randomly place mines
+      for y = 1, GRID_HEIGHT do
+          for x = 1, GRID_WIDTH do
+              if rnd() < MINE_CHANCE then
+                  grid[y][x] = 1 -- Place a mine
+              end
+          end
+      end
       game_state = "playing"
       return
     end
@@ -69,54 +91,15 @@ function _draw()
     elseif game_state == "end" then
       print(win_or_lose.."! 🅾️: restart ❎: quit")
     end
-    //TODO: draw the board and cursor
-    
-  end
-  -- print(@stat(1))  -- print out @STAT(1) at the end of each frame if you want to see perf information (portion of)
-end
-
---[[
-//chatgpt-generated code:
--- Constants for grid size
-GRID_WIDTH = 6
-GRID_HEIGHT = 8
-MINE_CHANCE = 0.1
-
--- Initialize grid with empty values
-grid = {}
-for y = 1, GRID_HEIGHT do
-    grid[y] = {}
-    for x = 1, GRID_WIDTH do
-        grid[y][x] = 0 -- Default to no mine
-    end
-end
-
--- Function to randomly place mines
-function place_mines()
-    for y = 1, GRID_HEIGHT do
-        for x = 1, GRID_WIDTH do
-            if rnd() < MINE_CHANCE then
-                grid[y][x] = 1 -- Place a mine
-            end
-        end
-    end
-end
-
--- Call function to populate the grid
-place_mines()
-
--- Debug: Print grid to console
-function _draw()
-    cls()
     for y = 1, GRID_HEIGHT do
         for x = 1, GRID_WIDTH do
             local cell = grid[y][x]
             print(cell, x * 8, y * 8, 7)
         end
     end
+  end
+  -- print(@stat(1))  -- print out @STAT(1) at the end of each frame if you want to see perf information (portion of)
 end
-
---]]
 
 print("hello~")
 print("HELLO ヘロ")
