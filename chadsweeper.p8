@@ -12,6 +12,18 @@ win_or_lose = "game end" //neutral value to begin with
 cursor_x = 1
 cursor_y = 1
 
+function enable_fast_motion()
+  //btnp (button press) delays //note that the delay is in "(in frames @ 30fps)", so it's doubled at 60fps like we have.
+  poke(0X5F5C, 1) -- "SET THE INITIAL DELAY BEFORE REPEATING. 255 MEANS NEVER REPEAT."
+  poke(0X5F5D, 1) -- "SET THE REPEATING DELAY."
+end
+
+function disable_fast_motion()
+  // "In both cases, 0 can be used for the default behaviour (delays 15 and 4)"
+  poke(0X5F5C, 200) -- SET THE INITIAL DELAY BEFORE REPEATING. 255 MEANS NEVER REPEAT.
+  poke(0X5F5D, 200) -- SET THE REPEATING DELAY.
+end
+
 function _init() //we don't really use this one
 end
 
@@ -48,23 +60,24 @@ function _update60() // defining _update60 instead of _update to get 60 fps
   end
 
   if game_state == "playing" then
-    //TODO: track player movement and cursor. and mark and dig things
+    enable_fast_motion()
     if btnp(⬅️) and cursor_x > 1 then
       cursor_x -= 1
     end
-    if btn(➡️) and cursor_x < screen_width then
+    if btnp(➡️) and cursor_x < screen_width then
       cursor_x += 1
     end
     if btnp(⬆️) and cursor_y > 1 then
       cursor_y -= 1
     end
-    if btn(⬇️) and cursor_y < screen_height then
+    if btnp(⬇️) and cursor_y < screen_height then
       cursor_y += 1
     end
     if btnp(🅾️) then
       dug[cursor_y][cursor_x] = 1
       if field[cursor_y][cursor_x] == 1 then
         game_state = "end"
+        disable_fast_motion()
       end
     elseif btnp(❎) then
       if dug[cursor_y][cursor_x] != 1 then
