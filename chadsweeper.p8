@@ -57,7 +57,7 @@ function _update60() // defining _update60 instead of _update to get 60 fps
   end
 
   if game_state == "playing" then
-    if artificial_input_rate_limiter == 0 then //todo: this is just for feel, but it could be improved with some input buffering probably.
+    if artificial_input_rate_limiter == 0 then //todo: this is just for feel, but it could be improved with some input buffering probably. // actually, come to think of it, the best way to do this type of input is presumably tracking it in smaller amounts and then discretize it. which also lines up pretty well with the idea of using the mouse pointer as well.
       artificial_input_rate_limiter = 2
       if btn(⬅️) and cursor_x > 1 then
         cursor_x -= 1
