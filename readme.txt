@@ -6,7 +6,7 @@ For a lark, for a larf, I'm making a minesweeper game. I'm doing it in Pico-8 bc
 
 Stage one of this project is just making a vanilla minesweeper game in pico8.
 
-1.5: add nice colors and stuff
+1.5: add nice colors and stuff. also make the controls smoother.
 
 Stage 2 is adding mouse support that also moves the in-game cursor. This is possible but you have to enable some things, I hear.
 
